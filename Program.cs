@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace ConsoleApplication4
 {
@@ -15,32 +16,31 @@ namespace ConsoleApplication4
         public int Salary;
 
         public Worker() { }
-
+        // переопределенный метод Equals(object obj)
         public override bool Equals(object obj)
         {
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj == null) return false;    // защищаем от падения из-за null
+            if (obj.GetType() != this.GetType()) return false;  // если не совпадают типы данных, то ложь
 
             Worker other = (Worker)obj;
             return (this.Name == other.Name) && (this.Job == other.Job) && (this.Salary == other.Salary);
         }
-
+        // переопределенный метод GetHashCode()
         public override int GetHashCode()
         {
-            return Hash(Name) + Hash(Job) + Salary;
+            var data = Encoding.Unicode.GetBytes(Name + Job + Convert.ToString(Salary)); // переводим в байты ФИО, Должность и Зарплату
+            var md5 = MD5.Create(); // создаем объект класса MD5
+            var result = md5.ComputeHash(data); // считаем хэш-код для наших байтов
+            return BitConverter.ToInt32(result, 0); // возвращаем int32
+            
         }
-
+        // переопределенный метод ToString()
         public override String ToString()
         {
-            return String.Format("{0} {1} {2}", this.Name, this.Job, this.Salary);
+            return String.Format("{0} {1} {2} {3} {4}", this.Name, this.Job, this.Salary,"\n",this.GetHashCode(), this.GetType());
         }
-
-        private int Hash(string str)
-        {
-            int sum = 0;
-            foreach (char ch in str)
-                sum += ch;
-            return sum;
-        }
+       
+       
     }
 
     // Класс "Бухгалтер" 
@@ -73,16 +73,18 @@ namespace ConsoleApplication4
 
         public void CalcSalary(Worker[] Salaryworker) // метод
         {
-            int sum = 0;
-            foreach (Worker MasRab in Salaryworker)
+            if ((Salaryworker.Length != 0) && (Salaryworker != null)) // защищаем от пустого входного массива
             {
-                sum += MasRab.Salary;
+                int sum = 0;
+                foreach (Worker MasRab in Salaryworker)
+                {
+                    sum += MasRab.Salary;
+                }
+                Console.WriteLine("---");
+                Console.WriteLine("Общая зарплата всех работников: {0} рублей", sum);
             }
-            Console.WriteLine("---");
-            Console.WriteLine("Общая зарплата всех работников: {0} рублей", sum);
         }
     }
-
     // Класс "Рабочий"
     public class Workers : Worker
     {
@@ -140,10 +142,14 @@ namespace ConsoleApplication4
             Accountant Acc1 = (Accountant)workers[0];
             Acc1.ChangeSalary(workers[3], 55000);
             Console.WriteLine("---");
-            Console.WriteLine("Новая зарплата для 4-его работника: \n{0} рублей", workers[3].ToString());
+            Console.WriteLine("Новая зарплата для 4-его работника: \n{0} ", workers[3].ToString());
 
             MainAccountant MAcc1 = (MainAccountant)workers[1];
             MAcc1.CalcSalary(workers);
+
+            // проверка как работает переопределенный метод Equals()
+            MainAccountant MAcc2 = null; // проверка, если объект сравнения = null
+            MAcc1.Equals(MAcc2);  // программа не падает при таких данных
 
             Workers Wor1 = (Workers)workers[2];
             Wor1.PutData(40000, 45000, 270);
