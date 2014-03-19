@@ -34,7 +34,8 @@ namespace ConsoleApplication4
         if (objA.GetType() != objB.GetType()) return false;  // если не совпадают типы данных, то ложь
         Worker first = (Worker)objA;
         Worker second = (Worker)objB;
-        return (first.Name == second.Name) && (first.Job == second.Job) && (first.Salary == second.Salary);
+        return (first.GetHashCode() == second.GetHashCode());
+       
     }
 
     // переопределенный метод Finalize()
@@ -42,7 +43,23 @@ namespace ConsoleApplication4
     {
         GC.SuppressFinalize(this);
     }
+// переопределенный метод MemberwiseClone()
+    new public Object MemberwiseClone()
+    {
+        Worker obj = new Worker();
+        if (this is Accountant) obj = new MainAccountant(this.Name, this.Salary);
+        else if (this is Accountant) obj = new Accountant(this.Name, this.Salary);
+             else if (this is Engineer) obj = new Engineer(this.Name, this.Salary);
+                  else if (this is Workers) obj =new Workers(this.Name, this.Salary);
+        return obj;
+    }
 
+    // переопределенный метод ReferenceEquals(Object objA, Object objB)
+    new public static bool ReferenceEquals(Object objA, Object objB)
+    {
+        if ((objA == null) && (objB == null)) return true;
+        return Equals(objA, objB);
+    }
 
         // переопределенный метод Equals(object obj)
         public override bool Equals(object obj)
