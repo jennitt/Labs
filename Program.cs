@@ -15,7 +15,35 @@ namespace ConsoleApplication4
         public string Job;
         public int Salary;
 
-        public Worker() { }
+       public Worker () { }
+
+    // переопределенный метод GetType()
+    new public Type GetType()
+    {
+        if (this is MainAccountant) return typeof(MainAccountant);
+        if (this is Accountant) return typeof(Accountant);
+        if (this is Engineer) return typeof(Engineer);
+        if (this is Workers) return typeof(Workers);
+        return typeof(object);
+    }
+
+    // переопределенный метод Equals(Object objA, Object objB)
+    new public static bool Equals(Object objA, Object objB)
+    {
+        if ((objA==null) || (objB==null)) return false;    // защищаем от падения из-за null
+        if (objA.GetType() != objB.GetType()) return false;  // если не совпадают типы данных, то ложь
+        Worker first = (Worker)objA;
+        Worker second = (Worker)objB;
+        return (first.Name == second.Name) && (first.Job == second.Job) && (first.Salary == second.Salary);
+    }
+
+    // переопределенный метод Finalize()
+    new public void Finalize()
+    {
+        GC.SuppressFinalize(this);
+    }
+
+
         // переопределенный метод Equals(object obj)
         public override bool Equals(object obj)
         {
@@ -34,6 +62,8 @@ namespace ConsoleApplication4
             return BitConverter.ToInt32(result, 0); // возвращаем int32
             
         }
+        
+   
         // переопределенный метод ToString()
         public override String ToString()
         {
@@ -51,6 +81,7 @@ namespace ConsoleApplication4
             this.Name = Name;
             this.Job = "Бухгалтер";
             this.Salary = Salary;
+
         }
 
         public Accountant() { }
@@ -134,6 +165,8 @@ namespace ConsoleApplication4
             workers[2] = new Workers("Сидорова Александра Игоревна", 40000);
             workers[3] = new Engineer("Матросова Анастасия Александровна", 50000);
 
+           
+
             foreach (Worker MasRab in workers)
             {
                 Console.WriteLine("Работник: {0}", MasRab.ToString());
@@ -150,6 +183,15 @@ namespace ConsoleApplication4
             // проверка как работает переопределенный метод Equals()
             MainAccountant MAcc2 = null; // проверка, если объект сравнения = null
             MAcc1.Equals(MAcc2);  // программа не падает при таких данных
+
+            // проверка статического метода Equals(Object objA, Object objB)
+                 MainAccountant MAcc3 = MAcc1;
+                 if (Equals(MAcc1, MAcc3)) // программа не падает при таких данных
+                 {
+                     Console.WriteLine("---");
+                     Console.WriteLine("Они равны! (2)");
+                     Console.WriteLine("---");
+                 }
 
             Workers Wor1 = (Workers)workers[2];
             Wor1.PutData(40000, 45000, 270);
